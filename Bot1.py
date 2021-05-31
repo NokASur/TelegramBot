@@ -1,6 +1,18 @@
 import os
 import telebot
 from telebot import types
+import feedparser
+
+
+def feed_parser():
+    newsfeed = {'РосРеестр': 'https://rosreestr.ru/site/rss/',
+                'Федеральная Налоговая Служба': 'https://www.nalog.ru/rn62/rss/'}
+    message = dict()
+    for key in newsfeed.keys():
+        current_news = feedparser.parse(newsfeed[key]).entries[0]
+        message[key] = current_news.title + '\n' + current_news.link
+    return message
+
 
 TOKEN = os.environ["TOKEN"]
 
@@ -37,7 +49,10 @@ def bla(message):
             bot.send_message(message.chat.id, "Нельзя просто так взять и реализовать базу данных")
 
         elif message.text == "Какие новости?":
-            bot.send_message(message.chat.id, "")
+            post = feed_parser()
+            bot.send_message(message.chat.id, 'Новая информация на выбранных площадках:')
+            for key in post.keys():
+                bot.send_message(message.chat.id, key + '\n' + post[key])
 
         else:
             bot.send_message(message.chat.id,
@@ -60,3 +75,4 @@ def callback(call):
 
 
 bot.polling(none_stop=True)
+
